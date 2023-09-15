@@ -19,13 +19,13 @@ const upload = async (req, res) => {
       });
     }
     res.status(500).json({
-      message: `Could not upload the file (22): ${err}`,
+      message: `Could not upload the file (upload.controller.js:22): ${err}`,
     });
   }
 };
 
 const incrementVersion = () => {
-  const directoryPath = __basedir + "/version.txt";
+  const directoryPath = __basedir + "/data/version.txt";
 
   fs.readFile(directoryPath, "utf8", (err, data) => {
     if (err) {
@@ -37,10 +37,8 @@ const incrementVersion = () => {
       const jsonData = JSON.parse(data);
       const currentVersion = jsonData;
 
-      // Tăng version
       const newVersion = currentVersion + 1;
 
-      // Lưu version mới vào tệp version.txt
       fs.writeFile(directoryPath, JSON.stringify(newVersion), (err) => {
         if (err) {
           console.error("Lỗi ghi tệp:", err);
@@ -55,7 +53,7 @@ const incrementVersion = () => {
 };
 
 const getVersion = (req, res) => {
-  const directoryPath = __basedir + "/version.txt";
+  const directoryPath = __basedir + "/data/version.txt";
 
   fs.readFile(directoryPath, "utf8", (err, data) => {
     if (err) {
@@ -66,9 +64,7 @@ const getVersion = (req, res) => {
     try {
       const jsonData = JSON.parse(data);
 
-      res.status(200).json({
-        version: jsonData,
-      });
+      res.status(200).json(jsonData);
     } catch (jsonError) {
       res.status(500).json({
         error: jsonError,
@@ -78,12 +74,12 @@ const getVersion = (req, res) => {
 };
 
 const getListFiles = (req, res) => {
-  const directoryPath = __basedir + "/save/";
+  const directoryPath = __basedir + "/data/save/";
 
   fs.readdir(directoryPath, function (err, files) {
     if (err) {
       res.status(500).json({
-        message: "Không tìm thấy file!",
+        message: "Không tìm thấy file (82)!",
       });
       return;
     }
@@ -93,11 +89,12 @@ const getListFiles = (req, res) => {
     files.forEach((file) => {
       fileInfos.push({
         name: file,
-        url: "/save/" + file,
+        url: "/data/save/" + file,
       });
     });
 
     if (fileInfos.length == 0) {
+      console.log(directoryPath);
       res.status(500).json({
         message: "Không tìm thấy file!",
       });
