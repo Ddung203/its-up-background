@@ -1,5 +1,9 @@
 import fs from "fs";
 import uploadFile from "../middleware/upload.js";
+import util from "util";
+
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 
 const upload = async (req, res) => {
   try {
@@ -8,7 +12,9 @@ const upload = async (req, res) => {
     if (req.file == undefined) {
       return res.status(400).json({ error: "Hãy chọn một file!" });
     }
-    incrementVersion();
+
+    await incrementVersion();
+
     return res.status(200).json({
       message: "Upload thành công file: " + req.file.originalname,
     });
@@ -19,32 +25,21 @@ const upload = async (req, res) => {
   }
 };
 
-const incrementVersion = () => {
-  const directoryPath = __basedir + "/data/version.txt";
+const incrementVersion = async () => {
+  const directoryPath = __basedir + "/data/version1.txt";
 
-  fs.readFile(directoryPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Lỗi đọc tệp(32):", err);
-      return;
-    }
+  try {
+    const data = await readFileAsync(directoryPath, "utf8");
+    const jsonData = JSON.parse(data);
+    const currentVersion = jsonData;
+    const newVersion = currentVersion + 1;
 
-    try {
-      const jsonData = JSON.parse(data);
-      const currentVersion = jsonData;
+    await writeFileAsync(directoryPath, JSON.stringify(newVersion));
 
-      const newVersion = currentVersion + 1;
-
-      fs.writeFile(directoryPath, JSON.stringify(newVersion), (err) => {
-        if (err) {
-          console.error("Lỗi ghi tệp(44):", err);
-          return;
-        }
-        console.log("Phiên bản đã được tăng lên:", newVersion);
-      });
-    } catch (jsonError) {
-      console.error("Lỗi xử lý dữ liệu JSON (50):", jsonError);
-    }
-  });
+    console.log("Phiên bản đã được tăng lên:", newVersion);
+  } catch (err) {
+    console.error("Lỗi xử lý dữ liệu JSON (50):", err);
+  }
 };
 
 const getVersion = (req, res) => {
