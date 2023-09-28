@@ -26,7 +26,7 @@ const upload = async (req, res) => {
 };
 
 const incrementVersion = async () => {
-  const directoryPath = __basedir + "/data/version1.txt";
+  const directoryPath = __basedir + "/data/version.txt";
 
   try {
     const data = await readFileAsync(directoryPath, "utf8");
